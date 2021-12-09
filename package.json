@@ -4,11 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev":"nodemon server",
-    "start":"node server"
+    "dev": "nodemon server",
+    "start": "node server"
   },
   "dependencies": {
     "dotenv": "^10.0.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^6.1.0",
+    "twilio": "^3.71.3"
   }
 }
