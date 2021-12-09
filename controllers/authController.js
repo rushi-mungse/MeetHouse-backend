@@ -1,6 +1,7 @@
 const User = require('../models/user')
 const hashService = require('../services/hashService');
 const otpService = require('../services/otpService')
+const jwtService = require('../services/jwtService')
 class AuthController {
     async sendOtp(req, res, next) {
         //getting Phone from user
@@ -26,10 +27,10 @@ class AuthController {
                 otp
             })
         } catch (error) {
-            console.log(error)
             return res.status(400).json({ msg: "Something went wrong!" })
         }
     }
+
     async verifyOtp(req, res, next) {
         //getting all the data from user
         const { phone, hashOtp, otp } = req.body
@@ -51,8 +52,9 @@ class AuthController {
         try {
             if (hash === hashedOtp) {
                 user = await User.findOne({ phone })
+                //create user if not in database
                 if (!user) {
-                    await User.create({
+                    user = await User.create({
                         phone
                     })
                 }
@@ -62,7 +64,20 @@ class AuthController {
         } catch (error) {
             return res.json({ message: "Something went wrong!" })
         }
-       return res.json({ msg: 'All Good!' })
+        //creating token
+        const access_token = await jwtService.createAccesssToken({ id: user._id })
+        const refresh_token = await jwtService.createRefreshToken({ id: user._id })
+
+        res.cookie('access_token', access_token, {
+            maxAge: 1000 * 60 * 60 * 24 * 30,
+            httpOnly: true
+        })
+        res.cookie('refresh_token', refresh_token, {
+            maxAge: 1000 * 60 * 60 * 24 * 30,
+            httpOnly: true
+        })
+
+        return res.json({ user })
     }
 }
 
