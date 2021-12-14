@@ -35,7 +35,7 @@ class AuthController {
     async verifyOtp(req, res, next) {
         //getting all the data from user
         const { phone, hashOtp, otp } = req.body
-    
+
         //validation 
         if (!phone || !hashOtp || !otp) {
             return res.status(401).json({ message: 'All fields are required!' })
@@ -78,7 +78,6 @@ class AuthController {
             maxAge: 1000 * 60 * 60 * 24 * 30,
             httpOnly: true
         })
-
         return res.json({ user: new UserDto(user), auth: true })
     }
 }

@@ -1,7 +1,7 @@
 
 const mongoose = require('mongoose')
 const DB_URL = process.env.MONGO_URL
-
+//connection of database
 function DbConnect() {
 
     mongoose.connect(DB_URL, {
