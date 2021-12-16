@@ -32,7 +32,7 @@ class ActivateController {
             }
             user.activated = true;
             user.name = name;
-            user.avatar = `/storage/${imgPath}`
+            user.avatar = `/uploads/${imgPath}`
             user.username = username
             user.save()
             res.json({ user: new UserDto(user), auth: true });

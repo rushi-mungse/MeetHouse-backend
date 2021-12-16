@@ -9,6 +9,9 @@ const routers = require('./routes')
 const DbConnect = require('./database')
 const cookieParser = require('cookie-parser')
 
+//connect database
+DbConnect()
+
 app.use(cookieParser())
 const cors = require('cors')
 const corsOption = {
@@ -18,9 +21,8 @@ const corsOption = {
 app.use(cors(corsOption))
 app.use(express.json({ limit: '10mb' }))
 app.use(routers)
+app.use('/uploads',express.static('uploads'))
 
-//connect database
-DbConnect()
 
 app.listen(PORT, () => {
     console.log(`Linstening on port ${PORT}`)

@@ -3,6 +3,7 @@ const hashService = require('../services/hashService');
 const otpService = require('../services/otpService')
 const jwtService = require('../services/jwtService')
 const UserDto = require('../dtos/userDto')
+const Token = require('../models/token');
 class AuthController {
     async sendOtp(req, res, next) {
         //getting Phone from user
@@ -70,6 +71,15 @@ class AuthController {
         const access_token = await jwtService.createAccesssToken({ id: user._id })
         const refresh_token = await jwtService.createRefreshToken({ id: user._id })
 
+        try {
+            await Token.create({
+                refresh_token,
+                userId: user._id
+            })
+        } catch (error) {
+            res.status(500).json({ message: 'something Went Wrong!' })
+        }
+
         res.cookie('access_token', access_token, {
             maxAge: 1000 * 60 * 60 * 24 * 30,
             httpOnly: true
@@ -80,6 +90,70 @@ class AuthController {
         })
         return res.json({ user: new UserDto(user), auth: true })
     }
+    async refresh(req, res, next) {
+        //get refresh token from cookies
+        const { refresh_token: refreshToken } = req.cookies
+        console.log(req.cookies)
+        if (req.cookies === null) {
+            res.status(500).json({ user: null, auth: false })
+        }
+        //verify refresh_token
+        let userData;
+        try {
+            userData = await jwtService.verifyRefreshToken(refreshToken)
+        } catch (error) {
+            res.status(401).json({ message: 'Invalid Tokens' })
+        }
+        //check refresh_token in database or not
+        try {  
+            const token = await jwtService.checkTokenInDb(userData.id)
+            if (!token) return res.status(401).json({ message: "Invalid Token" })
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: 'Internal server Error!' })
+        }
+        let user;
+        try {
+            user = await User.findOne({ _id: userData.id })
+            if (!user) return res.status(404).json({ message: 'User not found!' })
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Internal Server Error!" })
+        }
+        //creating token
+        const access_token = await jwtService.createAccesssToken({ id: user._id })
+        const refresh_token = await jwtService.createRefreshToken({ id: user._id })
+
+        try {
+            await Token.updateOne(
+                { userId: user._id },
+                { refresh_token: refresh_token }
+            )
+        } catch (error) {
+            res.status(500).json({ message: 'Something Went Wrong!' })
+        }
+
+        res.cookie('access_token', access_token, {
+            maxAge: 1000 * 60 * 60 * 24 * 30,
+            httpOnly: true
+        })
+
+        res.cookie('refresh_token', refresh_token, {
+            maxAge: 1000 * 60 * 60 * 24 * 30,
+            httpOnly: true
+        })
+
+        return res.json({ user: new UserDto(user), auth: true })
+    }
+
+    async logout(req, res, next) {
+        const { refresh_token } = req.cookies;
+        await jwtService.removeTokens(refresh_token)
+        res.clearCookie('access_token')
+        res.clearCookie('refresh_token')
+        res.json({ user: null, auth: false })
+    }
+
 }
 
 module.exports = new AuthController()
