@@ -3,7 +3,7 @@ const jwtService = require('../services/jwtService')
 const authMiddleware = async (req, res, next) => {
     //get access_token from cookies using cookie-parser
     const { access_token } = req.cookies;
-    console.log(req.cookies)  //token is valide or not
+    //token is valide or not
     try {
         if (!access_token) {
             throw new Error();

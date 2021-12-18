@@ -93,7 +93,7 @@ class AuthController {
     async refresh(req, res, next) {
         //get refresh token from cookies
         const { refresh_token: refreshToken } = req.cookies
-        console.log(req.cookies)
+      
         if (req.cookies === null) {
             res.status(500).json({ user: null, auth: false })
         }
