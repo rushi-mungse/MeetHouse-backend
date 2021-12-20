@@ -13,6 +13,7 @@ router.get('/api/refresh',authController.refresh)
 router.post('/api/logout',auth,authController.logout)
 router.post('/api/create-room',auth,roomController.createRoom)
 router.get('/api/getRoom',auth,roomController.index)
+router.post('/api/getRoomInfo',auth,roomController.roomInfo)
 
 
 module.exports = router
