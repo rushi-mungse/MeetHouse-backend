@@ -93,7 +93,7 @@ class AuthController {
     async refresh(req, res, next) {
         //get refresh token from cookies
         const { refresh_token: refreshToken } = req.cookies
-      
+
         if (req.cookies === null) {
             res.status(500).json({ user: null, auth: false })
         }
@@ -105,7 +105,7 @@ class AuthController {
             res.status(401).json({ message: 'Invalid Tokens' })
         }
         //check refresh_token in database or not
-        try {  
+        try {
             const token = await jwtService.checkTokenInDb(userData.id)
             if (!token) return res.status(401).json({ message: "Invalid Token" })
         } catch (error) {
@@ -114,7 +114,9 @@ class AuthController {
         }
         let user;
         try {
-            user = await User.findOne({ _id: userData.id })
+            if (userData) {
+                user = await User.findOne({ _id: userData.id })
+            }
             if (!user) return res.status(404).json({ message: 'User not found!' })
         } catch (error) {
             console.log(error)

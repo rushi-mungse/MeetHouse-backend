@@ -22,9 +22,9 @@ class RoomController {
         return res.json(allRooms)
     }
     async roomInfo(req, res, next) {
-        const { id } = req.body;
+        const { roomId } = req.body;
         try {
-            const getroomInfo = await roomService.getRoomInfoFromDatabase(id)
+            const getroomInfo = await roomService.getRoomInfoFromDatabase(roomId)
             res.json({ room: new RoomDto(getroomInfo) })
 
         } catch (error) {
